@@ -232,7 +232,7 @@ sum lncredits, d
 count if mod(credits,50)==0
 ** -> 1 270 ménages sur 3 962, soit 32 %
 
-** Tableau 7 : tests de normalité
+** Tableau 6 (suite) : tests de normalité
 sktest credits lncredits, noadjust
 swilk credits lncredits
 ** -> la normalité est rejetée pour les deux variables, mais lncredits a un skewness
@@ -244,7 +244,7 @@ swilk credits lncredits
 ** 3.ii Variables explicatives continues
 ** ---------------------------------------------------------------------
 
-** Tableau 8
+** Tableau 7
 tabstat agepr totreven lnrevenu, statistics(n mean sd min p10 p25 p50 p75 p90 max skewness kurtosis) ///
     columns(statistics) format(%9.4g)
 count if agepr<25
@@ -272,7 +272,7 @@ graph export "graphiques/fig04_hist_revenu.png", replace width(1600)
 ** 3.iii Variables explicatives qualitatives
 ** ---------------------------------------------------------------------
 
-** Tableau 9
+** Tableau 8 (effectifs et pourcentages)
 tab1 revenu_tr statut plusieurs_credits autre_immo enfants csp uu maison
 
 ** Pas de graphique pour les variables binaires (plusieurs_credits, autre_immo, maison)
@@ -318,7 +318,7 @@ graph export "graphiques/fig09_bar_uu.png", replace width(1600)
 ** 4.a Variables explicatives continues
 ** ---------------------------------------------------------------------
 
-** Age (Tableau 10 et Figure 10)
+** Age (Tableau 9 et Figure 10)
 pwcorr lncredits agepr, sig obs
 bysort agepr: egen moy_lncredits = mean(lncredits)
 egen tag_age = tag(agepr)
@@ -330,7 +330,7 @@ twoway (scatter moy_lncredits agepr if tag_age==1, mcolor("42 120 214")) ///
     title("Logarithme moyen des mensualités selon l'âge")
 graph export "graphiques/fig10_age_lncredits.png", replace width(1600)
 
-** Revenu (Tableau 10 et Figure 11), sur les ménages ayant déclaré leur revenu
+** Revenu (Tableau 9 et Figure 11), sur les ménages ayant déclaré leur revenu
 pwcorr lncredits lnrevenu, sig obs
 twoway (scatter lncredits lnrevenu, msize(vsmall) mcolor("42 120 214%30")) ///
     (lfit lncredits lnrevenu, lcolor("235 104 52") lwidth(medthick)), ///
@@ -341,7 +341,8 @@ graph export "graphiques/fig11_revenu_lncredits.png", replace width(1600)
 
 
 ** ---------------------------------------------------------------------
-** 4.b Variables explicatives qualitatives (Tableau 11 et Figures 12 à 19)
+** 4.b Variables explicatives qualitatives (Tableau 8 : mensualités moyennes et
+**     médianes, et Figures 12 à 19)
 ** ---------------------------------------------------------------------
 
 ** Revenu en tranches
@@ -372,6 +373,14 @@ graph bar (mean) credits, over(autre_immo) bar(1, color("42 120 214")) ///
     title("Crédit pour un autre bien immobilier")
 graph export "graphiques/fig15_moy_autreimmo.png", replace width(1600)
 
+** Type de logement
+tabstat credits, by(maison) statistics(n mean p50) format(%9.0f)
+tab maison statut, row nofreq
+graph bar (mean) credits, over(maison) bar(1, color("42 120 214")) ///
+    blabel(bar, format(%9.0f)) ytitle("Mensualité moyenne (euros)") ///
+    title("Mensualité moyenne selon le type de logement")
+graph export "graphiques/fig16_moy_logement.png", replace width(1600)
+
 ** Nombre d'enfants
 tabstat credits, by(enfants) statistics(n mean p50) format(%9.0f)
 ** lien entre nombre d'enfants, âge et accession à la propriété
@@ -380,28 +389,20 @@ tab enfants statut, row nofreq
 graph bar (mean) credits, over(enfants) bar(1, color("42 120 214")) ///
     blabel(bar, format(%9.0f)) ytitle("Mensualité moyenne (euros)") ///
     title("Mensualité moyenne selon le nombre d'enfants")
-graph export "graphiques/fig16_moy_enfants.png", replace width(1600)
+graph export "graphiques/fig17_moy_enfants.png", replace width(1600)
 
 ** CSP (barres triées par mensualité moyenne)
 tabstat credits, by(csp) statistics(n mean p50) format(%9.0f)
 graph hbar (mean) credits, over(csp, sort(1) descending) bar(1, color("42 120 214")) ///
     blabel(bar, format(%9.0f)) ytitle("Mensualité moyenne (euros)") ///
     title("Mensualité moyenne selon la CSP")
-graph export "graphiques/fig17_moy_csp.png", replace width(1600)
+graph export "graphiques/fig18_moy_csp.png", replace width(1600)
 
 ** Taille de l'unité urbaine
 tabstat credits, by(uu) statistics(n mean p50) format(%9.0f)
 graph hbar (mean) credits, over(uu) bar(1, color("42 120 214")) ///
     blabel(bar, format(%9.0f)) ytitle("Mensualité moyenne (euros)") ///
     title("Mensualité moyenne selon la taille de l'unité urbaine")
-graph export "graphiques/fig18_moy_uu.png", replace width(1600)
-
-** Type de logement
-tabstat credits, by(maison) statistics(n mean p50) format(%9.0f)
-tab maison statut, row nofreq
-graph bar (mean) credits, over(maison) bar(1, color("42 120 214")) ///
-    blabel(bar, format(%9.0f)) ytitle("Mensualité moyenne (euros)") ///
-    title("Mensualité moyenne selon le type de logement")
-graph export "graphiques/fig19_moy_logement.png", replace width(1600)
+graph export "graphiques/fig19_moy_uu.png", replace width(1600)
 
 ** Fin de la version intermédiaire
